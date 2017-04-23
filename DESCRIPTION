@@ -1,0 +1,23 @@
+Package: Earthquakes
+Type: Package
+Title: Plot and visualize National Oceanic and Atmospheric Administration's (NOAA) - Significant Earthquake Database
+Version: 0.1
+Date: 2017-04-22
+Author: JMT
+Maintainer: JMT <jmt@fars.com>
+Description: Functions to plot and visualize National Oceanic and Atmospheric Administration's (NOAA) - Significant Earthquake Database.
+Depends: R (>= 3.2.2)
+License: GPL (>= 3)
+LazyData: TRUE
+RoxygenNote: 5.0.1
+Imports: readr,
+         dplyr,
+         lubridate,
+         ggplot2,
+         leaflet,
+         tidyr,
+         tools
+Suggests: knitr,
+    rmarkdown,
+    testthat
+VignetteBuilder: knitr

@@ -1,0 +1,71 @@
+---
+title: "Earthquakes - Plot and Visualization"
+author: "JMT"
+date: "2017-04-22"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+## Earthquakes Package
+
+The Package has functions to plot and visualize data from National Centers for Environmental Information, National Oceanic and Atmospheric Administration's (NOAA) - Significant Earthquake Database.
+
+## Package Functions
+**Files/Data used for plotting and visualizing data exist in the package's ./init/extradata directory**
+
+1. **read_naoo_file(filename)** - Function to read a TAB delimited file.
+
+        Example: read_naoo_file(filename="earthquake_data_file")
+
+2. **eq_clean_data(filename)** - Function to read a TAB delimited file and tidy's it up for plotting and data visualization.
+
+        It merges the YEAR, MONTH and DAY fields into a DATE field. (YYYY-MM-DD).
+        It converts LATITUDE and LONGITUDE fields data to numeric
+        It cleans up LOCATION_NAME field data, it has a comma separated list of earthquake locations and camelcases the text.
+
+        Example: read_naoo_file(filename="earthquake_data_file")
+
+3. **GeomTimeLine()** - Geom for plotting a time line of earthquakes ranging from xmin to xmaxdates with a point for each earthquake. Optional aesthetics include color, size, and alpha (for transparency). The xaesthetic is a date and an optional y aesthetic is a factor indicating some stratification in which case multiple time lines will be plotted for each level of the factor (e.g. country).
+
+        Example: GeomTimeLine(...)
+
+
+4. **geom_timeline()** - Uses GeomTimeLine to plot earthquakes.
+
+        Example: geom_timeline(xmin = START_DATE,
+                               xmax = END_DATE)
+
+5. **GeomTimeLineLabel** - Geom for for adding annotations to the earthquake data. This geom adds a vertical line to each data point with a text annotation (e.g. the location of the earthquake) attached to each line. There should be an option to subset to n_max number of earthquakes, where we take the n_max largest (by magnitude) earthquakes. Aesthetics are x, which is the date of the earthquake and label which takes the column name from which annotations will be obtained.
+
+        Example: GeomTimeLineLabel(...)
+
+
+6. **geom_timeline_label()** - Uses GeomTimeLineLabel to plot earthquakes labels.
+
+        Example: geom_timeline_label(xmin = START_DATE,
+                                     xmax = END_DATE,
+                                     n_max = N_MAX)
+
+7. **eq_create_label(eq_data)** - Function takes the dataset as an argument and creates an HTML label that can be used as the annotation text in the leaflet map. This function should put together a character string for each earthquake that will show the cleaned location (as cleaned by the eq_location_clean() function created in Module 1), the magnitude (EQ_PRIMARY), and the total number of deaths (TOTAL_DEATHS), with boldface labels for each ("Location", "Total deaths", and "Magnitude"). If an earthquake is missing values for any of these, both the label and the value should be skipped for that element of the tag.
+
+        Example: eq_create_label(data=eq_data)
+
+8. **eq_map (eq_data, annot_col)** - Plots data for visulization.
+
+        Example: eq_map(data=eq_data, annot_col="DATE")
+        Example: eq_map(data=eq_data, annot_col="popup_text")
+
+**Example Uses**
+
+1.      eq_clean_data("earthquake_data_file") %>%
+        dplyr::filter(COUNTRY == "MEXICO" & lubridate::year(DATE) >= 2000) %>%
+        eq_map(annot_col = "DATE")
+
+2.      eq_clean_data('C:/jmt/Coursera/RCourse/Courses/Capstone/signif.txt') %>%
+        dplyr::filter(COUNTRY == "MEXICO" & lubridate::year(DATE) >= 2000) %>%
+        dplyr::mutate(popup_text = eq_create_label(.)) %>%
+        eq_map(annot_col = "popup_text")
+
