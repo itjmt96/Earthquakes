@@ -2,7 +2,7 @@
 % Please edit documentation in R/earthquakes.R
 \name{eq_clean_data}
 \alias{eq_clean_data}
-\title{Function to clean NAOO file.}
+\title{Function to clean National Oceanic and Atmospheric Administration's (NOAA) file.}
 \usage{
 eq_clean_data(filename)
 }

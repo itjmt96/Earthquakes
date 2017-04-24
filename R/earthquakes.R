@@ -1,6 +1,6 @@
 utils::globalVariables(c("YEAR", "MONTH", "DAY", "DT", "DATE", "LATITUDE", "LONGITUDE", "LOCATION_NAME", "%>%"))
 #'
-#' Function to read NAOO file.
+#' Function to read National Oceanic and Atmospheric Administration's (NOAA) file.
 #'
 #' This function uses readr and dplyr packages.
 #' 1.   Read file
@@ -19,12 +19,12 @@ utils::globalVariables(c("YEAR", "MONTH", "DAY", "DT", "DATE", "LATITUDE", "LONG
 #'
 #' @examples
 #' \dontrun{
-#' read_naoo_file("signif.txt")
-#' read_naoo_file(filename="signif.txt")
+#' read_noaa_file("signif.txt")
+#' read_noaa_file(filename="signif.txt")
 #' }
 #'
 #' @export
-read_naoo_file <- function(filename) {
+read_noaa_file <- function(filename) {
         if(!file.exists(filename))
                 stop("file '", filename, "' does not exist")
         data <- suppressMessages({
@@ -32,7 +32,35 @@ read_naoo_file <- function(filename) {
         })
 }
 
-#' Function to clean NAOO file.
+#' Function to clean LOCATION_NAME field from National Oceanic and Atmospheric Administration's (NOAA) file.
+#'
+#' This function uses dplyr and tools packages.
+#' Cleans LOCATION_NAME field data by stripping of the country name, extra whitespaces.
+#' Cleaned LOCATION_NAME field data has city name or locaton names in the country.
+#' Converts cleaned LOCATION_NAME field data to toTitleCase.
+#'
+#' @importFrom dplyr %>% filter mutate
+#' @importFrom tools toTitleCase
+#'
+#' @param data Data as dataframe object.
+#'
+#' @return Dataframe object with clean LOCATION_NAME fields data.
+#'
+#' @examples
+#' \dontrun{
+#' eq_location_clean(data=eq_clean)
+#' }
+#'
+#' @export
+eq_location_clean <- function(data) {
+        data <- data %>%
+                dplyr::mutate(LOCATION_NAME = tools::toTitleCase(tolower(trimws(
+                gsub(".*:", "", LOCATION_NAME)
+        ))))
+        data
+}
+
+#' Function to clean National Oceanic and Atmospheric Administration's (NOAA) file.
 #'
 #' This function uses dplyr, lubridate, tidyr,  and  tools packages.
 #' 1.   Read file
@@ -50,7 +78,6 @@ read_naoo_file <- function(filename) {
 #' @importFrom lubridate ymd
 #' @importFrom dplyr %>% filter mutate
 #' @importFrom tidyr drop_na
-#' @importFrom tools toTitleCase
 #'
 #' @param filename A filename as input string.
 #'
@@ -64,7 +91,7 @@ read_naoo_file <- function(filename) {
 #'
 #' @export
 eq_clean_data <- function(filename) {
-                read_naoo_file(filename) %>%
+        data <- read_noaa_file(filename) %>%
 
                 dplyr::filter(!is.na(YEAR), YEAR > 0, !is.na(MONTH), !is.na(DAY)) %>%
                 dplyr::mutate(DT=paste(YEAR, MONTH, DAY, sep = '-')) %>%
@@ -74,11 +101,9 @@ eq_clean_data <- function(filename) {
                 dplyr::mutate(LATITUDE=as.numeric(LATITUDE)) %>%
                 dplyr::mutate(LONGITUDE=as.numeric(LONGITUDE)) %>%
                 tidyr::drop_na(LATITUDE) %>%
-                tidyr::drop_na(LATITUDE) %>%
-
-                dplyr::mutate(LOCATION_NAME = tools::toTitleCase(tolower(trimws(
-                        gsub(".*:", "", LOCATION_NAME)
-                ))))
+                tidyr::drop_na(LATITUDE)
+        data <- eq_location_clean(data)
+        data
 }
 
 #' Custom Geom to plot earthquakes by date and magnitude.
@@ -146,7 +171,7 @@ GeomTimeLine <- ggplot2::ggproto(
 #' @return Returns ggplot2 labels
 #'
 #' @export
-geom_timeLine <-
+geom_timeline <-
         function(data = NULL,
                  mapping = NULL,
                  stat = "identity",
@@ -260,6 +285,7 @@ geom_timeline_label <-
                                 n_max = n_max,
                                 ...
                         )
+
                 )
         }
 
