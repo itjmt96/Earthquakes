@@ -47,3 +47,4 @@ test_that("geom_timeline_label returns ggplot and htmlwidget",{
         data <- eq_clean_data("signif.txt")
         expect_that(ggplot() + geom_timeline(data = data,aes(x = DATE)) + geom_timeline_label(data = data,aes(x = DATE)), is_a("ggplot"))
 })
+
