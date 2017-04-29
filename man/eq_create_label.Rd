@@ -13,7 +13,7 @@ eq_create_label(eq_data)
 HTML label with location, magnitude and deaths
 }
 \description{
-This function uses shiny package.
+Function to create label for loation, magnitude and deaths.
 }
 \examples{
 \dontrun{

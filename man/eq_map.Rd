@@ -16,7 +16,6 @@ ggplot2 plot
 }
 \description{
 This function uses leaflet package.
-1.   Read file
 }
 \examples{
 \dontrun{

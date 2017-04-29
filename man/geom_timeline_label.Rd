@@ -4,46 +4,32 @@
 \alias{geom_timeline_label}
 \title{Geom to plot earthquake labels for date or location, magnitude, deaths.}
 \usage{
-geom_timeline_label(data = NULL, mapping = NULL, stat = "identity",
-  position = "identity", na.rm = FALSE, show.legend = FALSE,
-  inherit.aes = TRUE, xmin = NULL, xmax = NULL, n_max = 5, ...)
+geom_timeline_label(data, xmindate, xmaxdate, country, n_max)
 }
 \arguments{
 \item{data}{Tidy earthquake data, as dataframe}
 
-\item{mapping}{Mapping asethetics}
+\item{xmindate}{Minimum Date to plot}
 
-\item{stat}{Value for Statistical transformation, as string}
+\item{xmaxdate}{Maximum Date to plot}
 
-\item{position}{Position adjustment for the layer, as string}
-
-\item{na.rm}{Remove missing values}
-
-\item{show.legend}{Weather to show legend or not, as NA/TRUE/FALSE/}
-
-\item{inherit.aes}{Weather to show legend or not, TRUE/FALSE/}
-
-\item{xmin}{Minimum Date to plot}
-
-\item{xmax}{Maximum Date to plot}
+\item{country}{Character vector of Country/Countries to plot}
 
 \item{n_max}{Number of labels to plot}
-
-\item{...}{Other asethetics/parameters for plotting}
 }
 \value{
-Returns ggplot2 labels
+Returns ggplot
 }
 \description{
 This Geom uses ggplot2 package.
 }
 \examples{
 \dontrun{
-geom_timeline_label(read_noaa_file(filename="signif.txt"),
+geom_timeline_label(data = read_noaa_file(filename="signif.txt"),
                     xmindate = "2000-01-01",
                     xmaxdate = "2017-12-31",
                     country = c("JAPAN"),
-                    n_max = 7.2)
+                    n_max = 7)
 }
 
 }

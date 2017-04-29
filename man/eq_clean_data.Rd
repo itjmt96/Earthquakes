@@ -25,6 +25,8 @@ This function uses dplyr, lubridate, tidyr,  and  tools packages.
      Cleans LOCATION_NAME field data by stripping of the country name, extra whitespaces.
      Cleaned LOCATION_NAME field data has city name or locaton names in the country.
      Converts cleaned LOCATION_NAME field data to toTitleCase.
+5.   EQ_PRIMARY field data
+     Mutates EQ_PRIMARY field data to numeric.
 }
 \examples{
 \dontrun{

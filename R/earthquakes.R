@@ -1,4 +1,6 @@
-utils::globalVariables(c("YEAR", "MONTH", "DAY", "DT", "DATE", "LATITUDE", "LONGITUDE"))
+utils::globalVariables(c("YEAR", "MONTH", "DAY", "DT", "DATE", "LATITUDE", "LONGITUDE",
+                         "EQ_PRIMARY", "COUNTRY", "LOCATION_NAME", "DEATHS", "element_rect",
+                         "element_blank", "element_line", "aes"))
 #'
 #' Function to read National Oceanic and Atmospheric Administration's (NOAA) file.
 #'
@@ -39,10 +41,6 @@ read_noaa_file <- function(filename) {
 #' Cleaned LOCATION_NAME field data has city name or locaton names in the country.
 #' Converts cleaned LOCATION_NAME field data to toTitleCase.
 #'
-#' @importFrom dplyr filter mutate
-#' @importFrom tools toTitleCase
-#' @importFrom magrittr %>%
-#'
 #' @param data Data as dataframe object.
 #'
 #' @return Dataframe object with clean LOCATION_NAME fields data.
@@ -51,6 +49,10 @@ read_noaa_file <- function(filename) {
 #' \dontrun{
 #' eq_location_clean(data=eq_clean)
 #' }
+#'
+#' @importFrom dplyr mutate
+#' @importFrom tools toTitleCase
+#' @importFrom magrittr %>%
 #'
 #' @export
 eq_location_clean <- function(data) {
@@ -76,11 +78,8 @@ eq_location_clean <- function(data) {
 #'      Cleans LOCATION_NAME field data by stripping of the country name, extra whitespaces.
 #'      Cleaned LOCATION_NAME field data has city name or locaton names in the country.
 #'      Converts cleaned LOCATION_NAME field data to toTitleCase.
-#'
-#' @importFrom lubridate ymd
-#' @importFrom dplyr filter mutate
-#' @importFrom tidyr drop_na
-#' @importFrom magrittr %>%
+#' 5.   EQ_PRIMARY field data
+#'      Mutates EQ_PRIMARY field data to numeric.
 #'
 #' @param filename A filename as input string.
 #'
@@ -92,245 +91,128 @@ eq_location_clean <- function(data) {
 #' eq_clean_data(filename="signif.txt")
 #' }
 #'
+#' @importFrom dplyr filter mutate
+#' @importFrom lubridate ymd
+#' @importFrom tidyr drop_na
+#' @importFrom magrittr %>%
+#'
 #' @export
 eq_clean_data <- function(filename) {
-        data <- read_noaa_file(filename) %>%
-
-                dplyr::filter(!is.na(YEAR), YEAR > 0, !is.na(MONTH), !is.na(DAY)) %>%
-                dplyr::mutate(DT=paste(YEAR, MONTH, DAY, sep = '-')) %>%
-                dplyr::mutate(DATE=substring(lubridate::ymd(DT),1,10)) %>%
+        data <- read_noaa_file(filename)
+                data %>%
+                dplyr::filter_(!is.na(YEAR), YEAR > 0, !is.na(MONTH), !is.na(DAY)) %>%
+                dplyr::mutate_(DT=paste(YEAR, MONTH, DAY, sep = '-')) %>%
+                dplyr::mutate_(DATE=substring(lubridate::ymd(DT),1,10)) %>%
                 tidyr::drop_na(DATE) %>%
 
-                dplyr::mutate(LATITUDE=as.numeric(LATITUDE)) %>%
-                dplyr::mutate(LONGITUDE=as.numeric(LONGITUDE)) %>%
+                dplyr::mutate_(LATITUDE=as.numeric(LATITUDE)) %>%
+                dplyr::mutate_(LONGITUDE=as.numeric(LONGITUDE)) %>%
+                dplyr::mutate_(EQ_PRIMARY=as.numeric(data$EQ_PRIMARY)) %>%
                 tidyr::drop_na(LATITUDE) %>%
                 tidyr::drop_na(LONGITUDE)
         data <- eq_location_clean(data)
         data
 }
 
-#' Custom Geom to plot earthquakes by date and magnitude.
-#'
-#' This Geom uses ggplot2, grid packages.
-#'
-#' @importFrom ggplot2 Geom
-#' @importFrom grid pointsGrob gpar
-#'
-#' @return Returns ggplot2 scatterplot
-#'
-#' @export
-GeomTimeLine <- ggplot2::ggproto(
-        "GeomTimeLine",
-        ggplot2::GeomPoint,
-        required_aes = c("x"),
-        non_missing_aes = c("size", "shape", "colour"),
-        default_aes = ggplot2::aes_(
-                shape = 19, colour = "black",
-                size = 2, fill = NA,
-                alpha = 0.5, stroke = 0.5,
-                y = NULL
-        ),
-        setup_data = function(data, params) {
-                data <- subset(data, data$DATE > params$xmin &
-                                       data$DATE < params$xmax)
-        },
-        draw_key = ggplot2::draw_key_point,
-        draw_panel = function(data,
-                              panel_params,
-                              coord,
-                              xmin,
-                              xmax) {
-                coords <- coord$transform(data, panel_params)
-                grid::pointsGrob(
-                        coords$x, coords$y,
-                        pch = coords$shape,
-                        gp = grid::gpar(
-                                col = alpha(coords$colour, coords$alpha),
-                                fill = alpha(coords$fill, coords$alpha),
-                                fontsize = coords$size * .pt + coords$stroke * .stroke / 2,
-                                lwd = coords$stroke * .stroke / 2
-                        )
-                )
-        }
-)
-
 #' Geom to plot earthquakes by date and magnitude
 #'
 #' This Geom uses ggplot2 package.
 #'
-#' @importFrom ggplot2 layer
+#' @importFrom ggplot2 ggplot geom_point theme labs
 #'
 #' @param data Tidy earthquake data, as dataframe
-#' @param mapping Mapping asethetics
-#' @param stat Value for Statistical transformation, as string
-#' @param position Position adjustment for the layer, as string
-#' @param na.rm Remove missing values
-#' @param show.legend Weather to show legend or not, as NA/TRUE/FALSE/
-#' @param inherit.aes Weather to show legend or not, TRUE/FALSE/
-#' @param xmin Minimum Date to plot
-#' @param xmax Maximum Date to plot
-#' @param ... Other asethetics/parameters for plotting
-#'
-#' @return A Geom object that is used within the \code{geom_timeline_label} function.
+#' @param xmindate Minimum Date to plot
+#' @param xmaxdate Maximum Date to plot
+#' @param country Character vector of Country/Countries to plot
 #'
 #' @examples
 #' \dontrun{
-#' geom_timeline(read_noaa_file(filename="signif.txt"),
-#'                              xmindate = "2000-01-01",
-#'                              xmaxdate = "2017-12-31",
-#'                              country = c("JAPAN"))
+#' geom_timeline(data = eq_clean_data('signif.txt'),
+#'               xmindate = "2001-01-01",
+#'               xmaxdate = "2017-12-31",
+#'               country = c("MEXICO"))
 #' }
 #'
-#' @return Returns ggplot2 labels
+#' @return Returns ggplot
 #'
 #' @export
-geom_timeline <-
-        function(data = NULL,
-                 mapping = NULL,
-                 stat = "identity",
-                 position = "identity",
-                 na.rm = FALSE,
-                 show.legend = NA,
-                 inherit.aes = TRUE,
-                 xmin = NULL ,
-                 xmax = NULL,
-                 ...) {
-                ggplot2::layer(
-                        data = data,
-                        mapping = mapping,
-                        stat = stat,
-                        geom = GeomTimeLine,
-                        position = position,
-                        show.legend = show.legend,
-                        inherit.aes = inherit.aes,
-                        params = list(
-                                na.rm = na.rm,
-                                xmin = xmin ,
-                                xmax = xmax,
-                                ...
-                        )
-                )
-        }
+geom_timeline = function(data, xmindate, xmaxdate, country) {
 
-#' Custom Geom to plot earthquake labels for date or location, magnitude, deaths.
-#'
-#' This Geom uses ggplot2, grid packages.
-#'
-#' @importFrom ggplot2 Geom
-#' @importFrom grid pointsGrob grobTree segmentsGrob textGrob gpar
-#'
-#' @return Returns ggplot2 labels
-#'
-#' @export
-GeomTimeLineLabel <- ggplot2::ggproto(
-        "GeomTimeLineLabel",
-        ggplot2::Geom,
-        required_aes = c("x", "y"),
-        default_aes = ggplot2::aes(
-                countries = NULL,
-                size = 1.5,
-                location_name = NULL
-        ),
-        setup_data = function(data, params) {
-                data <-subset(data, data$DATE > params$xmin &
-                              data$DATE < params$xmax)
-                data <- data[order(data$COUNTRIES,-data$SIZE), ]
-                data <- by(data, data["COUNTRIES"], head, n = params$n_max)
-                data <- Reduce(rbind, data)
-        },
-        draw_panel = function(data,
-                              panel_scales,
-                              coord,
-                              xmin,
-                              xmax,
-                              n_max) {
-                coords <- coord$transform(data, panel_scales)
-                coords$y2 = coords$y + 0.1
-                grid::grobTree(
-                        grid::segmentsGrob(
-                                x0 = coords$x,
-                                y0 = coords$y,
-                                x1 = coords$x,
-                                y1 = coords$y2,
-                                gp = grid::gpar(col = "grey")
-                        ),
-                        grid::textGrob(
-                                x = coords$x,
-                                y = coords$y2,
-                                label = coords$LOCATION_NAME,
-                                hjust = -0.1,
-                                vjust = -0.1,
-                                rot = 45,
-                                gp = grid::gpar(col = coords$colour, fontsize = 10)
-                        )
-                )
-        }
-)
+        data <- subset(data,
+                       data$DATE > xmindate &
+                       data$DATE < xmaxdate &
+                       data$COUNTRY %in% country)
+
+        ggplot2::ggplot(data, aes(x = data$DATE,
+                                  y = data$COUNTRY,
+                                  size = data$EQ_PRIMARY,
+                                  colour = data$TOTAL_DEATHS)) +
+        ggplot2::geom_point(shape=21) +
+        ggplot2::theme(legend.position = "bottom",
+                       legend.direction = "horizontal",
+                       legend.box = "horizontal",
+                       legend.key = element_rect(fill = "white"),
+                       axis.title.y = element_blank(),
+                       panel.background = element_rect(fill = "white", colour = NA),
+                       axis.line = element_line(colour = "black"),
+                       axis.line.y = element_line(colour = "white"),
+                       axis.ticks.y = element_line(colour = "white"))+
+        ggplot2::labs(size = "Richter scale value", colour = "# deaths")
+}
 
 #' Geom to plot earthquake labels for date or location, magnitude, deaths.
 #'
 #' This Geom uses ggplot2 package.
 #'
-#' @importFrom ggplot2 layer
+#' @importFrom ggplot2 ggplot geom_point theme labs geom_text
 #'
 #' @param data Tidy earthquake data, as dataframe
-#' @param mapping Mapping asethetics
-#' @param stat Value for Statistical transformation, as string
-#' @param position Position adjustment for the layer, as string
-#' @param na.rm Remove missing values
-#' @param show.legend Weather to show legend or not, as NA/TRUE/FALSE/
-#' @param inherit.aes Weather to show legend or not, TRUE/FALSE/
-#' @param xmin Minimum Date to plot
-#' @param xmax Maximum Date to plot
+#' @param xmindate Minimum Date to plot
+#' @param xmaxdate Maximum Date to plot
+#' @param country Character vector of Country/Countries to plot
 #' @param n_max Number of labels to plot
-#' @param ... Other asethetics/parameters for plotting
 #'
 #' @examples
 #' \dontrun{
-#' geom_timeline_label(read_noaa_file(filename="signif.txt"),
+#' geom_timeline_label(data = read_noaa_file(filename="signif.txt"),
 #'                     xmindate = "2000-01-01",
 #'                     xmaxdate = "2017-12-31",
 #'                     country = c("JAPAN"),
-#'                     n_max = 7.2)
+#'                     n_max = 7)
 #' }
 #'
-#' @return Returns ggplot2 labels
+#' @return Returns ggplot
 #'
 #' @export
-geom_timeline_label <-
-        function(data = NULL,
-                 mapping = NULL,
-                 stat = "identity",
-                 position = "identity",
-                 na.rm = FALSE,
-                 show.legend = FALSE,
-                 inherit.aes = TRUE,
-                 xmin = NULL ,
-                 xmax = NULL,
-                 n_max = 5,
-                 ...) {
-                ggplot2::layer(
-                        geom = GeomTimeLineLabel,
-                        mapping = mapping,
-                        data = data,
-                        stat = stat,
-                        position = position,
-                        show.legend = show.legend,
-                        inherit.aes = inherit.aes,
-                        params = list(
-                                na.rm = na.rm,
-                                xmin = xmin,
-                                xmax = xmax,
-                                n_max = n_max,
-                                ...
-                        )
+geom_timeline_label = function(data, xmindate, xmaxdate, country, n_max){
 
-                )
-        }
+        data <- subset(data,
+                       data$DATE > xmindate &
+                       data$DATE < xmaxdate &
+                       data$COUNTRY %in% country)
+
+        ggplot2::ggplot(data, aes(x = data$DATE,
+                                  y = data$COUNTRY,
+                                  size = data$EQ_PRIMARY,
+                                  colour = data$TOTAL_DEATHS,
+                                  label = data$LOCATION_NAME)) +
+        ggplot2::geom_point(shape=21) +
+        ggplot2::theme(legend.position = "bottom",
+                       legend.direction = "horizontal",
+                       legend.box = "horizontal",
+                       legend.key = element_rect(fill = "white"),
+                       axis.title.y = element_blank(),
+                       panel.background = element_rect(fill = "white", colour = NA),
+                       axis.line = element_line(colour = "black"),
+                       axis.line.y = element_line(colour = "white"),
+                       axis.ticks.y = element_line(colour = "white"))+
+        ggplot2::labs(size = "Richter scale value", colour = "# deaths")+
+        ggplot2::geom_text(data = data[data$EQ_PRIMARY > n_max,],
+                           aes(x = data$DATE,y = data$COUNTRY, angle = 45, size = 5),
+                           nudge_y = 0.1, hjust = 0, show.legend  = FALSE)
+}
 
 #' Function to create label for loation, magnitude and deaths.
-#'
-#' This function uses shiny package.
 #'
 #' @param eq_data Tidy earthquake data
 #'
@@ -353,7 +235,6 @@ eq_create_label <- function(eq_data) {
 #' Function plots map based on data and annot_col.
 #'
 #' This function uses leaflet package.
-#' 1.   Read file
 #'
 #' @importFrom leaflet leaflet addTiles addCircleMarkers
 #'
@@ -377,8 +258,7 @@ eq_map <- function(eq_data, annot_col) {
                 radius = eq_data$EQ_PRIMARY,
                 lng = eq_data$LONGITUDE,
                 lat = eq_data$LATITUDE,
-                fillOpacity = 0.5,
-                stroke = FALSE,
+                fillOpacity = 0.2,
                 weight = 1,
                 popup  = eq_data[[annot_col]]
         )

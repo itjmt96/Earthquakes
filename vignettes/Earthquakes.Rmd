@@ -28,36 +28,25 @@ The Package has functions to plot and visualize data from National Centers for E
 
         Example: read_naoo_file(filename="earthquake_data_file")
 
-3. **GeomTimeLine()** - Geom for plotting a time line of earthquakes ranging from xmin to xmaxdates with a point for each earthquake. Optional aesthetics include color, size, and alpha (for transparency). The xaesthetic is a date and an optional y aesthetic is a factor indicating some stratification in which case multiple time lines will be plotted for each level of the factor (e.g. country).
+3. **geom_timeline()** - Geom for plotting a time line of earthquakes ranging from xmin to xmax dates with a point for each earthquake. Optional aesthetics include color, size, and alpha (for transparency). The x aesthetic is a date and an optional y aesthetic is a factor indicating some stratification in which case multiple time lines will be plotted for each level of the factor (e.g. country).
 
-        Example: GeomTimeLine(...)
+        Example: geom_timeline(data = eq_clean_data('signif.txt'),
+                               xmin = "2001-01-01",
+                               xmax = "2017-12-31",
+                               country = c("MEXICO"))
 
+4. **geom_timeline_label()** - Geom for for adding annotations to the earthquake data. This geom adds a vertical line to each data point with a text annotation (e.g. the location of the earthquake) attached to each line. There should be an option to subset to n_max number of earthquakes, where we take the n_max largest (by magnitude) earthquakes. Aesthetics are x, which is the date of the earthquake and label which takes the column name from which annotations will be obtained.
 
-4. **geom_timeline()** - Uses GeomTimeLine to plot earthquakes.
+        Example: geom_timeline_label(data = eq_clean_data('signif.txt'),
+                                     xmin = "2001-01-01",
+                                     xmax = "2017-12-31",
+                                     country = c("MEXICO"))
 
-        Example: geom_timeline(read_noaa_file(filename="signif.txt"),
-                               xmindate = "2000-01-01",
-                               xmaxdate = "2017-12-31",
-                               COUNTRY = c("JAPAN"))
-
-5. **GeomTimeLineLabel** - Geom for for adding annotations to the earthquake data. This geom adds a vertical line to each data point with a text annotation (e.g. the location of the earthquake) attached to each line. There should be an option to subset to n_max number of earthquakes, where we take the n_max largest (by magnitude) earthquakes. Aesthetics are x, which is the date of the earthquake and label which takes the column name from which annotations will be obtained.
-
-        Example: GeomTimeLineLabel(...)
-
-
-6. **geom_timeline_label()** - Uses GeomTimeLineLabel to plot earthquakes labels.
-
-        Example: geom_timeline_label(read_noaa_file(filename="signif.txt"),
-                                     xmindate = "2000-01-01",
-                                     xmaxdate = "2017-12-31",
-                                     COUNTRY = c("JAPAN"),
-                                     n_max = 7.2)
-
-7. **eq_create_label(eq_data)** - Function takes the dataset as an argument and creates an HTML label that can be used as the annotation text in the leaflet map. This function should put together a character string for each earthquake that will show the cleaned location (as cleaned by the eq_location_clean() function created in Module 1), the magnitude (EQ_PRIMARY), and the total number of deaths (TOTAL_DEATHS), with boldface labels for each ("Location", "Total deaths", and "Magnitude"). If an earthquake is missing values for any of these, both the label and the value should be skipped for that element of the tag.
+5. **eq_create_label(eq_data)** - Function takes the dataset as an argument and creates an HTML label that can be used as the annotation text in the leaflet map. This function should put together a character string for each earthquake that will show the cleaned location (as cleaned by the eq_location_clean() function created in Module 1), the magnitude (EQ_PRIMARY), and the total number of deaths (TOTAL_DEATHS), with boldface labels for each ("Location", "Total deaths", and "Magnitude"). If an earthquake is missing values for any of these, both the label and the value should be skipped for that element of the tag.
 
         Example: eq_create_label(data=eq_data)
 
-8. **eq_map (eq_data, annot_col)** - Plots data for visulization.
+6. **eq_map (eq_data, annot_col)** - Plots data for visulization.
 
         Example: eq_map(data=eq_data, annot_col="DATE")
         Example: eq_map(data=eq_data, annot_col="popup_text")

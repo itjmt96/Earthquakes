@@ -4,7 +4,7 @@ Title: Plot and visualize National Oceanic and Atmospheric Administration's (NOA
 Version: 0.1
 Date: 2017-04-22
 Author: JMT
-Maintainer: JMT <jmt@fars.com>
+Maintainer: JMT <jmt@noaa.com>
 Description: Functions to plot and visualize National Oceanic and Atmospheric Administration's (NOAA) - Significant Earthquake Database.
 Depends: R (>= 3.2.2)
 License: GPL (>= 3)
