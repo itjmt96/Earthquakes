@@ -30,9 +30,20 @@ geom_timeline(data = NULL, mapping = NULL, stat = "identity",
 \item{...}{Other asethetics/parameters for plotting}
 }
 \value{
+A Geom object that is used within the \code{geom_timeline_label} function.
+
 Returns ggplot2 labels
 }
 \description{
 This Geom uses ggplot2 package.
+}
+\examples{
+\dontrun{
+geom_timeline(read_noaa_file(filename="signif.txt"),
+                             xmindate = "2000-01-01",
+                             xmaxdate = "2017-12-31",
+                             country = c("JAPAN"))
+}
+
 }
 

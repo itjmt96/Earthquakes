@@ -16,7 +16,8 @@ Imports: readr,
          ggplot2,
          leaflet,
          tidyr,
-         tools
+         tools,
+         magrittr
 Suggests: knitr,
     rmarkdown,
     testthat

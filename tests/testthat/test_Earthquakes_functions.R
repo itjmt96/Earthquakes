@@ -37,13 +37,13 @@ test_that("eq_map(eq_data, annot_col) creates a leaflet", {
                   eq_map(annot_col = "DATE"), "leaflet")
 })
 
-test_that("geom_timeline returns ggplot and htmlwidget", {
+test_that("geom_timeline returns htmlwidget", {
         data <- eq_clean_data("signif.txt")
         expect_that(ggplot() + geom_timeline(data = data,aes(x = DATE)), is_a("ggplot"))
         expect_that(data %>% dplyr::filter(COUNTRY == "MEXICO" & lubridate::year(DATE) >= 2000) %>% eq_map(annot_col = "DATE"), is_a("htmlwidget"))
         })
 
-test_that("geom_timeline_label returns ggplot and htmlwidget",{
+test_that("geom_timeline_label returns ggplot",{
         data <- eq_clean_data("signif.txt")
         expect_that(ggplot() + geom_timeline(data = data,aes(x = DATE)) + geom_timeline_label(data = data,aes(x = DATE)), is_a("ggplot"))
 })

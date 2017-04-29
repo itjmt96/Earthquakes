@@ -4,7 +4,7 @@
 \name{GeomTimeLine}
 \alias{GeomTimeLine}
 \title{Custom Geom to plot earthquakes by date and magnitude.}
-\format{An object of class \code{GeomTimeLine} (inherits from \code{Geom}, \code{ggproto}) of length 6.}
+\format{An object of class \code{GeomTimeLine} (inherits from \code{GeomPoint}, \code{Geom}, \code{ggproto}) of length 7.}
 \usage{
 GeomTimeLine
 }
@@ -13,7 +13,6 @@ Returns ggplot2 scatterplot
 }
 \description{
 This Geom uses ggplot2, grid packages.
-1.   Read file
 }
 \keyword{datasets}
 

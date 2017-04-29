@@ -37,4 +37,14 @@ Returns ggplot2 labels
 \description{
 This Geom uses ggplot2 package.
 }
+\examples{
+\dontrun{
+geom_timeline_label(read_noaa_file(filename="signif.txt"),
+                    xmindate = "2000-01-01",
+                    xmaxdate = "2017-12-31",
+                    country = c("JAPAN"),
+                    n_max = 7.2)
+}
+
+}
 
