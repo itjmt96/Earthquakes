@@ -58,8 +58,8 @@ read_noaa_file <- function(filename) {
 eq_location_clean <- function(data) {
         data <- data %>%
                 dplyr::mutate(LOCATION_NAME = tools::toTitleCase(tolower(trimws(
-                                              gsub(".*:", "", data$LOCATION_NAME)
-        ))))
+                        gsub(".*:", "", data$LOCATION_NAME)
+                ))))
 
         data
 }
@@ -98,16 +98,16 @@ eq_location_clean <- function(data) {
 #'
 #' @export
 eq_clean_data <- function(filename) {
-        data <- read_noaa_file(filename)
-                data %>%
-                dplyr::filter_(!is.na(YEAR), YEAR > 0, !is.na(MONTH), !is.na(DAY)) %>%
-                dplyr::mutate_(DT=paste(YEAR, MONTH, DAY, sep = '-')) %>%
-                dplyr::mutate_(DATE=substring(lubridate::ymd(DT),1,10)) %>%
+        data <- read_noaa_file(filename) %>%
+
+                dplyr::filter(!is.na(YEAR), YEAR > 0, !is.na(MONTH), !is.na(DAY)) %>%
+                dplyr::mutate(DT=paste(YEAR, MONTH, DAY, sep = '-')) %>%
+                dplyr::mutate(DATE=substring(lubridate::ymd(DT),1,10)) %>%
                 tidyr::drop_na(DATE) %>%
 
-                dplyr::mutate_(LATITUDE=as.numeric(LATITUDE)) %>%
-                dplyr::mutate_(LONGITUDE=as.numeric(LONGITUDE)) %>%
-                dplyr::mutate_(EQ_PRIMARY=as.numeric(data$EQ_PRIMARY)) %>%
+                dplyr::mutate(LATITUDE=as.numeric(LATITUDE)) %>%
+                dplyr::mutate(LONGITUDE=as.numeric(LONGITUDE)) %>%
+                dplyr::mutate(EQ_PRIMARY=as.numeric(EQ_PRIMARY)) %>%
                 tidyr::drop_na(LATITUDE) %>%
                 tidyr::drop_na(LONGITUDE)
         data <- eq_location_clean(data)
@@ -140,24 +140,24 @@ geom_timeline = function(data, xmindate, xmaxdate, country) {
 
         data <- subset(data,
                        data$DATE > xmindate &
-                       data$DATE < xmaxdate &
-                       data$COUNTRY %in% country)
+                               data$DATE < xmaxdate &
+                               data$COUNTRY %in% country)
 
         ggplot2::ggplot(data, aes(x = data$DATE,
                                   y = data$COUNTRY,
                                   size = data$EQ_PRIMARY,
                                   colour = data$TOTAL_DEATHS)) +
-        ggplot2::geom_point(shape=21) +
-        ggplot2::theme(legend.position = "bottom",
-                       legend.direction = "horizontal",
-                       legend.box = "horizontal",
-                       legend.key = element_rect(fill = "white"),
-                       axis.title.y = element_blank(),
-                       panel.background = element_rect(fill = "white", colour = NA),
-                       axis.line = element_line(colour = "black"),
-                       axis.line.y = element_line(colour = "white"),
-                       axis.ticks.y = element_line(colour = "white"))+
-        ggplot2::labs(size = "Richter scale value", colour = "# deaths")
+                ggplot2::geom_point(shape=21) +
+                ggplot2::theme(legend.position = "bottom",
+                               legend.direction = "horizontal",
+                               legend.box = "horizontal",
+                               legend.key = element_rect(fill = "white"),
+                               axis.title.y = element_blank(),
+                               panel.background = element_rect(fill = "white", colour = NA),
+                               axis.line = element_line(colour = "black"),
+                               axis.line.y = element_line(colour = "white"),
+                               axis.ticks.y = element_line(colour = "white"))+
+                ggplot2::labs(size = "Richter scale value", colour = "# deaths")
 }
 
 #' Geom to plot earthquake labels for date or location, magnitude, deaths.
@@ -188,28 +188,28 @@ geom_timeline_label = function(data, xmindate, xmaxdate, country, n_max){
 
         data <- subset(data,
                        data$DATE > xmindate &
-                       data$DATE < xmaxdate &
-                       data$COUNTRY %in% country)
+                               data$DATE < xmaxdate &
+                               data$COUNTRY %in% country)
 
         ggplot2::ggplot(data, aes(x = data$DATE,
                                   y = data$COUNTRY,
                                   size = data$EQ_PRIMARY,
                                   colour = data$TOTAL_DEATHS,
                                   label = data$LOCATION_NAME)) +
-        ggplot2::geom_point(shape=21) +
-        ggplot2::theme(legend.position = "bottom",
-                       legend.direction = "horizontal",
-                       legend.box = "horizontal",
-                       legend.key = element_rect(fill = "white"),
-                       axis.title.y = element_blank(),
-                       panel.background = element_rect(fill = "white", colour = NA),
-                       axis.line = element_line(colour = "black"),
-                       axis.line.y = element_line(colour = "white"),
-                       axis.ticks.y = element_line(colour = "white"))+
-        ggplot2::labs(size = "Richter scale value", colour = "# deaths")+
-        ggplot2::geom_text(data = data[data$EQ_PRIMARY > n_max,],
-                           aes(x = data$DATE,y = data$COUNTRY, angle = 45, size = 5),
-                           nudge_y = 0.1, hjust = 0, show.legend  = FALSE)
+                ggplot2::geom_point(shape=21) +
+                ggplot2::theme(legend.position = "bottom",
+                               legend.direction = "horizontal",
+                               legend.box = "horizontal",
+                               legend.key = element_rect(fill = "white"),
+                               axis.title.y = element_blank(),
+                               panel.background = element_rect(fill = "white", colour = NA),
+                               axis.line = element_line(colour = "black"),
+                               axis.line.y = element_line(colour = "white"),
+                               axis.ticks.y = element_line(colour = "white"))+
+                ggplot2::labs(size = "Richter scale value", colour = "# deaths")+
+                ggplot2::geom_text(data = data[data$EQ_PRIMARY > n_max,],
+                                   aes(x = data$DATE,y = data$COUNTRY, angle = 45, size = 5),
+                                   nudge_y = 0.1, hjust = 0, show.legend  = FALSE)
 }
 
 #' Function to create label for loation, magnitude and deaths.
@@ -252,14 +252,14 @@ eq_create_label <- function(eq_data) {
 #' @export
 eq_map <- function(eq_data, annot_col) {
         leaflet::leaflet() %>%
-        leaflet::addTiles() %>%
-        leaflet::addCircleMarkers(
-                data = eq_data,
-                radius = eq_data$EQ_PRIMARY,
-                lng = eq_data$LONGITUDE,
-                lat = eq_data$LATITUDE,
-                fillOpacity = 0.2,
-                weight = 1,
-                popup  = eq_data[[annot_col]]
-        )
+                leaflet::addTiles() %>%
+                leaflet::addCircleMarkers(
+                        data = eq_data,
+                        radius = eq_data$EQ_PRIMARY,
+                        lng = eq_data$LONGITUDE,
+                        lat = eq_data$LATITUDE,
+                        fillOpacity = 0.2,
+                        weight = 1,
+                        popup  = eq_data[[annot_col]]
+                )
 }

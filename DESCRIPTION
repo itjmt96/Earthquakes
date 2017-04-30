@@ -7,7 +7,7 @@ Author: JMT
 Maintainer: JMT <jmt@noaa.com>
 Description: Functions to plot and visualize National Oceanic and Atmospheric Administration's (NOAA) - Significant Earthquake Database.
 Depends: R (>= 3.2.2)
-License: GPL (>= 3)
+License: file LICENSE
 LazyData: TRUE
 RoxygenNote: 5.0.1
 Imports: readr,
